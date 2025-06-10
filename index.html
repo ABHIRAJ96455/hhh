@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Secret Image</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <style>
+    body {
+      background: #000;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 60px;
+    }
+    img {
+      max-width: 90%;
+      border: 4px solid green;
+      border-radius: 12px;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Checking Registration...</h2>
+  <div id="imageArea" style="display:none;">
+    <h3>✅ You are Registered!</h3>
+    <img src="https://cdn.twocontinents.com/hfpqy_V7_B_IMG_Dubai_UAE_1200x800_e1936b3330.jpg" alt="Secret">
+  </div>
+  <p id="msg" style="margin-top: 20px;"></p>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMN_dqsObCktz-Mqd_gedC2BjvvvmgLXk",
+      authDomain: "ff-script-login.firebaseapp.com",
+      databaseURL: "https://ff-script-login-default-rtdb.firebaseio.com",
+      projectId: "ff-script-login",
+      storageBucket: "ff-script-login.firebasestorage.app",
+      messagingSenderId: "1051285329458",
+      appId: "1:1051285329458:android:675e40f372e4899b474e2b"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function getUID() {
+      return localStorage.getItem("deviceUID");
+    }
+
+    function checkAccess() {
+      const uid = getUID();
+      if (!uid) {
+        document.getElementById("msg").innerText = "❌ Not Registered.";
+        return;
+      }
+
+      db.ref("users/" + uid + "/registeredAt").get().then(snapshot => {
+        if (snapshot.exists()) {
+          const regTime = snapshot.val();
+          const now = Date.now();
+          if (now - regTime <= 86400000) {
+            document.getElementById("imageArea").style.display = "block";
+            document.querySelector("h2").style.display = "none";
+          } else {
+            document.getElementById("msg").innerText = "⏰ Access Expired. Please register again.";
+          }
+        } else {
+          document.getElementById("msg").innerText = "❌ Not Registered.";
+        }
+      }).catch(error => {
+        document.getElementById("msg").innerText = "❌ Error: " + error.message;
+      });
+    }
+
+    checkAccess();
+  </script>
+</body>
+</html>
